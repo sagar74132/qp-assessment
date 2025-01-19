@@ -11,6 +11,7 @@ import com.qp.qpassessment.service.UsersService;
 import com.qp.qpassessment.utils.AppConfig;
 import com.qp.qpassessment.utils.GenericResponse;
 import com.qp.qpassessment.utils.MD5Util;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
+    @Transactional
     public GenericResponse<UsersModel> createUser(UsersModel user) {
 
         if (null != user.getId()) {

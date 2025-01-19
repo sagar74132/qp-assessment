@@ -23,4 +23,17 @@ public class Enums {
         Snacks,
         Sweets
     }
+
+    public enum PaymentStatus {
+        PENDING,
+        PAID,
+        FAILED
+    }
+
+    public enum OrderItemStatus {
+        PENDING,
+        PLACED,
+        DELIVERED,
+        CANCELLED
+    }
 }

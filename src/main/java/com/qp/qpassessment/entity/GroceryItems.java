@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -42,4 +43,7 @@ public class GroceryItems {
     @Column(name = "is_deleted", columnDefinition = "INT DEFAULT 0")
     @Builder.Default
     private Integer isDeleted = 0;
+
+    @OneToMany(targetEntity = OrderItems.class, mappedBy = "id", cascade = CascadeType.ALL)
+    private List<OrderItems> orderItems;
 }

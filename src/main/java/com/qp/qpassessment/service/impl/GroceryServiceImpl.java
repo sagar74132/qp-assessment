@@ -239,4 +239,8 @@ public class GroceryServiceImpl implements GroceryService {
             throw new GroceryException(appConfig.getProperty("something.went.wrong"));
         }
     }
+
+    public List<GroceryItems> getGroceryItemsById(List<UUID> ids) {
+        return groceryItemRepository.findAllById(ids);
+    }
 }

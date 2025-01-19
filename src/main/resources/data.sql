@@ -26,10 +26,11 @@ CREATE TABLE users
 CREATE TABLE orders
 (
     id          UUID PRIMARY KEY,
-    user_id     INT            NOT NULL,
+    user_id     UUID           NOT NULL,
     total_price DECIMAL(10, 2) NOT NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_deleted  INT       DEFAULT 0,
+    created_at  TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
+    is_deleted  INT         DEFAULT 0,
+    status      VARCHAR(50) DEFAULT 'PENDING',
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
@@ -37,11 +38,21 @@ CREATE TABLE orders
 CREATE TABLE order_items
 (
     id              UUID PRIMARY KEY,
-    order_id        INT            NOT NULL,
-    grocery_item_id INT            NOT NULL,
+    order_id        UUID           NOT NULL,
+    grocery_item_id UUID           NOT NULL,
     quantity        INT            NOT NULL CHECK (quantity > 0),
     price           DECIMAL(10, 2) NOT NULL,
     is_deleted      INT DEFAULT 0,
     FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
     FOREIGN KEY (grocery_item_id) REFERENCES grocery_items (id)
+);
+
+-- Payments table
+CREATE TABLE payments
+(
+    id           UUID PRIMARY KEY,
+    order_id     UUID NOT NULL,
+    status       VARCHAR(50) DEFAULT 'PENDING',
+    payment_date TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders (id)
 );

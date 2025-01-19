@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -43,5 +44,8 @@ public class Users {
     @Column(name = "is_deleted")
     @Builder.Default
     private Integer isDeleted = 0;
+
+    @OneToMany(targetEntity = Orders.class, mappedBy = "id", cascade = CascadeType.ALL)
+    private List<Orders> orders;
 }
 
