@@ -9,8 +9,8 @@ import com.qp.qpassessment.model.UsersDto;
 import com.qp.qpassessment.repository.UsersRepository;
 import com.qp.qpassessment.service.UsersService;
 import com.qp.qpassessment.utils.AppConfig;
+import com.qp.qpassessment.utils.BCryptPasswordEncoderUtil;
 import com.qp.qpassessment.utils.GenericResponse;
-import com.qp.qpassessment.utils.MD5Util;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -150,7 +150,7 @@ public class UsersServiceImpl implements UsersService {
     }
 
     private String hashPassword(String password) {
-        return MD5Util.generateMD5Hash(password);
+        return BCryptPasswordEncoderUtil.encode(password);
     }
 
     private GenericResponse<UsersDto> buildGenericResponse(Optional<Users> user) {
