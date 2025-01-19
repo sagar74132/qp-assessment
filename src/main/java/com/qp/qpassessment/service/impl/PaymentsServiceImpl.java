@@ -3,8 +3,8 @@ package com.qp.qpassessment.service.impl;
 import com.qp.qpassessment.entity.Payments;
 import com.qp.qpassessment.exception.PaymentException;
 import com.qp.qpassessment.mapper.PaymentsMapper;
-import com.qp.qpassessment.model.PaymentStatusUpdateRequest;
-import com.qp.qpassessment.model.PaymentsModel;
+import com.qp.qpassessment.model.PaymentStatusUpdateRequestDto;
+import com.qp.qpassessment.model.PaymentsDto;
 import com.qp.qpassessment.repository.PaymentRepository;
 import com.qp.qpassessment.service.PaymentsService;
 import com.qp.qpassessment.utils.AppConfig;
@@ -29,15 +29,15 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     @Transactional
-    public GenericResponse<PaymentsModel> createPayment(PaymentsModel paymentsModel) {
-        Payments payment = PaymentsMapper.mapToPayments(paymentsModel);
+    public GenericResponse<PaymentsDto> createPayment(PaymentsDto paymentsDto) {
+        Payments payment = PaymentsMapper.mapToPayments(paymentsDto);
 
         payment = paymentRepository.save(payment);
 
-        paymentsModel.setId(payment.getId());
+        paymentsDto.setId(payment.getId());
 
-        return GenericResponse.<PaymentsModel>builder()
-                .data(paymentsModel)
+        return GenericResponse.<PaymentsDto>builder()
+                .data(paymentsDto)
                 .message(appConfig.getProperty("payment.created", payment.getId()))
                 .status(HttpStatus.CREATED)
                 .build();
@@ -45,7 +45,7 @@ public class PaymentsServiceImpl implements PaymentsService {
 
     @Override
     @Transactional
-    public GenericResponse<PaymentsModel> updatePayment(PaymentStatusUpdateRequest request) {
+    public GenericResponse<PaymentsDto> updatePayment(PaymentStatusUpdateRequestDto request) {
 
         Optional<Payments> payment = paymentRepository.findById(request.getId());
 
@@ -55,8 +55,8 @@ public class PaymentsServiceImpl implements PaymentsService {
 
         Payments updatePayment = paymentRepository.save(payment.get());
 
-        return GenericResponse.<PaymentsModel>builder()
-                .data(PaymentsModel.builder()
+        return GenericResponse.<PaymentsDto>builder()
+                .data(PaymentsDto.builder()
                         .id(updatePayment.getId())
                         .orderId(updatePayment.getOrderId())
                         .status(updatePayment.getStatus())

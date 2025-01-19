@@ -2,7 +2,7 @@ package com.qp.qpassessment.service.impl;
 
 import com.qp.qpassessment.entity.GroceryItems;
 import com.qp.qpassessment.exception.GroceryException;
-import com.qp.qpassessment.mapper.GroceryItemsToModelMapper;
+import com.qp.qpassessment.mapper.GroceryItemsMapper;
 import com.qp.qpassessment.model.GroceryItemModel;
 import com.qp.qpassessment.repository.GroceryItemRepository;
 import com.qp.qpassessment.service.GroceryService;
@@ -37,7 +37,7 @@ public class GroceryServiceImpl implements GroceryService {
             Optional<List<GroceryItems>> groceryItems = groceryItemRepository.findAllByIsDeleted(0);
 
             return groceryItems.map(items -> items.stream()
-                    .map(GroceryItemsToModelMapper::mapTo)
+                    .map(GroceryItemsMapper::mapToModel)
                     .toList()
             ).orElse(null);
         } catch (Exception e) {
@@ -52,7 +52,7 @@ public class GroceryServiceImpl implements GroceryService {
             Optional<List<GroceryItems>> groceryItems = groceryItemRepository.findAllByIsDeletedAndQuantityGreaterThan(0, 0);
 
             return groceryItems.map(items -> items.stream()
-                    .map(GroceryItemsToModelMapper::mapTo)
+                    .map(GroceryItemsMapper::mapToModel)
                     .toList()
             ).orElse(null);
         } catch (Exception e) {
@@ -70,7 +70,7 @@ public class GroceryServiceImpl implements GroceryService {
             List<GroceryItemModel> groceryItemModels = new ArrayList<>();
 
             groceriesList.forEach(grocery -> {
-                GroceryItems groceryItem = GroceryItemsToModelMapper.mapFrom(grocery);
+                GroceryItems groceryItem = GroceryItemsMapper.mapToEntity(grocery);
 
                 // If an item already exists then add it in error
                 groceryItemRepository.findByNameAndIsDeleted(groceryItem.getName(), 0)
@@ -78,7 +78,7 @@ public class GroceryServiceImpl implements GroceryService {
                             errorStruct.add(appConfig.getProperty("item.already.exists", groceryItem.getName()));
                         }, () -> {
                             GroceryItems saveItem = groceryItemRepository.save(groceryItem);
-                            groceryItemModels.add(GroceryItemsToModelMapper.mapTo(saveItem));
+                            groceryItemModels.add(GroceryItemsMapper.mapToModel(saveItem));
                         });
             });
 
@@ -155,23 +155,24 @@ public class GroceryServiceImpl implements GroceryService {
             List<GroceryItemModel> groceryItemModels = new ArrayList<>();
 
             groceriesList.forEach(grocery -> {
-                GroceryItems groceryItem = GroceryItemsToModelMapper.mapFrom(grocery);
+                Optional<GroceryItems> groceryItem = groceryItemRepository.findByIdAndIsDeleted(grocery.getId(), 0);
 
-                // If an item not exist then add it in error
-                groceryItemRepository.findById(groceryItem.getId())
-                        .ifPresentOrElse(item -> {
-                            GroceryItems saveItem = groceryItemRepository.save(groceryItem);
-                            groceryItemModels.add(GroceryItemsToModelMapper.mapTo(saveItem));
-                        }, () -> {
-                            errorStruct.add(appConfig.getProperty("item.not.exist.for.update", groceryItem.getId()));
-                        });
+                if (groceryItem.isEmpty()) {
+                    errorStruct.add(appConfig.getProperty("item.not.exist.for.update", grocery.getId()));
+                } else if (grocery.getQuantity() < 0) {
+                    errorStruct.add(appConfig.getProperty("item.quantity.invalid", grocery.getId()));
+                } else {
+                    GroceryItems mappedGroceryItems = mapModelToGroceryItem(grocery, groceryItem.get());
+                    GroceryItems saveItem = groceryItemRepository.save(mappedGroceryItems);
+                    groceryItemModels.add(GroceryItemsMapper.mapToModel(saveItem));
+                }
             });
 
             String message;
             HttpStatus status = null;
             if (groceryItemModels.isEmpty()) {
-                message = appConfig.getProperty("items.not.update");
-                status = HttpStatus.NOT_FOUND;
+                message = appConfig.getProperty("items.not.updated");
+                status = HttpStatus.BAD_REQUEST;
             } else if (!errorStruct.isEmpty()) {
                 message = appConfig.getProperty("items.updated.with.errors");
             } else {
@@ -193,47 +194,17 @@ public class GroceryServiceImpl implements GroceryService {
 
     @Override
     @Transactional
-    public GenericResponse<String> updateInventory(Map<UUID, Integer> items) {
+    public GenericResponse<List<GroceryItemModel>> updateInventory(Map<UUID, Integer> items) {
         try {
-            List<String> errorStruct = new ArrayList<>();
-            List<String> successStruct = new ArrayList<>();
 
-            for (Map.Entry<UUID, Integer> item : items.entrySet()) {
+            List<GroceryItemModel> groceryItemModels = items.entrySet().stream()
+                    .map(e -> GroceryItemModel.builder()
+                            .id(e.getKey())
+                            .quantity(e.getValue())
+                            .build())
+                    .toList();
 
-                if (item.getValue() < 0) {
-                    errorStruct.add(appConfig.getProperty("item.quantity.invalid", item.getKey()));
-                    continue;
-                }
-
-                // If an item not exist then add it in error
-                groceryItemRepository.findById(item.getKey())
-                        .ifPresentOrElse(grocery -> {
-                            grocery.setQuantity(item.getValue());
-                            groceryItemRepository.save(grocery);
-                            successStruct.add(item.getKey().toString());
-                        }, () -> {
-                            errorStruct.add(appConfig.getProperty("item.not.exist", "id", item.getKey()));
-                        });
-
-            }
-
-            String message;
-            HttpStatus status = null;
-            if (successStruct.isEmpty()) {
-                message = appConfig.getProperty("items.not.update");
-                status = HttpStatus.NOT_FOUND;
-            } else if (!errorStruct.isEmpty()) {
-                message = appConfig.getProperty("items.updated.with.errors");
-            } else {
-                message = appConfig.getProperty("items.updated.successfully");
-            }
-
-            return GenericResponse.<String>builder()
-                    .errors(errorStruct)
-                    .success(successStruct)
-                    .message(message)
-                    .status(null != status ? status : HttpStatus.OK)
-                    .build();
+            return updateGroceryItems(groceryItemModels);
         } catch (Exception e) {
             log.info(e.getMessage());
             throw new GroceryException(appConfig.getProperty("something.went.wrong"));
@@ -242,5 +213,36 @@ public class GroceryServiceImpl implements GroceryService {
 
     public List<GroceryItems> getGroceryItemsById(List<UUID> ids) {
         return groceryItemRepository.findAllById(ids);
+    }
+
+    private GroceryItems mapModelToGroceryItem(GroceryItemModel groceryItemModel, GroceryItems item) {
+        if (null != groceryItemModel.getName()
+                && !groceryItemModel.getName().isEmpty()
+                && !groceryItemModel.getName().equals(item.getName())) {
+            item.setName(groceryItemModel.getName());
+        }
+
+        if (null != groceryItemModel.getCategory()
+                && !groceryItemModel.getCategory().equals(item.getCategory())) {
+            item.setCategory(groceryItemModel.getCategory());
+        }
+
+        if (null != groceryItemModel.getDescription()
+                && !groceryItemModel.getDescription().equals(item.getDescription())) {
+            item.setDescription(groceryItemModel.getDescription());
+        }
+
+        if (null != groceryItemModel.getPrice()
+                && !groceryItemModel.getPrice().equals(item.getPrice())) {
+            item.setPrice(groceryItemModel.getPrice());
+        }
+
+        if (null != groceryItemModel.getQuantity()
+                && !groceryItemModel.getQuantity().equals(item.getQuantity())) {
+            item.setQuantity(groceryItemModel.getQuantity());
+        }
+
+        return item;
+
     }
 }

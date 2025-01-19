@@ -1,7 +1,7 @@
 package com.qp.qpassessment.controller;
 
-import com.qp.qpassessment.model.UserRoleUpdate;
-import com.qp.qpassessment.model.UsersModel;
+import com.qp.qpassessment.model.UserRoleUpdateRequestDto;
+import com.qp.qpassessment.model.UsersDto;
 import com.qp.qpassessment.service.UsersService;
 import com.qp.qpassessment.service.impl.UsersServiceImpl;
 import com.qp.qpassessment.utils.AppConfig;
@@ -27,29 +27,29 @@ public class UserController {
     }
 
     @PostMapping("")
-    public ResponseEntity<GenericResponse<UsersModel>> createUser(@RequestBody UsersModel usersModel) {
-        GenericResponse<UsersModel> response = usersService.createUser(usersModel);
+    public ResponseEntity<GenericResponse<UsersDto>> createUser(@RequestBody UsersDto usersDto) {
+        GenericResponse<UsersDto> response = usersService.createUser(usersDto);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("")
-    public ResponseEntity<GenericResponse<UsersModel>> updateUser(@RequestBody UsersModel usersModel) {
-        GenericResponse<UsersModel> response = usersService.updateUser(usersModel);
+    public ResponseEntity<GenericResponse<UsersDto>> updateUser(@RequestBody UsersDto usersDto) {
+        GenericResponse<UsersDto> response = usersService.updateUser(usersDto);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/role")
-    public ResponseEntity<GenericResponse<UsersModel>> updateUserRole(@RequestBody UserRoleUpdate payload) {
-        GenericResponse<UsersModel> response = usersService.updateUserRole(payload);
+    public ResponseEntity<GenericResponse<UsersDto>> updateUserRole(@RequestBody UserRoleUpdateRequestDto payload) {
+        GenericResponse<UsersDto> response = usersService.updateUserRole(payload);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<GenericResponse<UsersModel>> deleteUser(@PathVariable UUID id) {
-        GenericResponse<UsersModel> response = usersService.deleteUser(id);
+    public ResponseEntity<GenericResponse<UsersDto>> deleteUser(@PathVariable UUID id) {
+        GenericResponse<UsersDto> response = usersService.deleteUser(id);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }

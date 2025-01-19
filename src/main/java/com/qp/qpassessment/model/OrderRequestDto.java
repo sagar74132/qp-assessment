@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class OrderRequest {
+public class OrderRequestDto {
 
     @NotNull(message = "${order.grocery.id.not.provided}")
     private UUID groceryItemId;

@@ -1,7 +1,7 @@
 package com.qp.qpassessment.controller;
 
-import com.qp.qpassessment.model.OrderRequest;
-import com.qp.qpassessment.model.OrderResponse;
+import com.qp.qpassessment.model.OrderRequestDto;
+import com.qp.qpassessment.model.OrderResponseDto;
 import com.qp.qpassessment.service.OrderService;
 import com.qp.qpassessment.service.impl.OrderServiceImpl;
 import com.qp.qpassessment.utils.AppConfig;
@@ -30,8 +30,8 @@ public class OrderController {
     }
 
     @PostMapping("")
-    public ResponseEntity<GenericResponse<OrderResponse>> placeOrder(@RequestBody List<OrderRequest> orderRequest) {
-        GenericResponse<OrderResponse> response = orderService.placeOrder(orderRequest);
+    public ResponseEntity<GenericResponse<OrderResponseDto>> placeOrder(@RequestBody List<OrderRequestDto> orderRequestDto) {
+        GenericResponse<OrderResponseDto> response = orderService.placeOrder(orderRequestDto);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

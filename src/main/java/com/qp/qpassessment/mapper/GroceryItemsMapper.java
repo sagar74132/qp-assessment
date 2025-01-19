@@ -1,6 +1,5 @@
 package com.qp.qpassessment.mapper;
 
-import com.qp.qpassessment.constant.Enums;
 import com.qp.qpassessment.entity.GroceryItems;
 import com.qp.qpassessment.model.GroceryItemModel;
 import lombok.Builder;
@@ -10,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-public class GroceryItemsToModelMapper {
+public class GroceryItemsMapper {
 
-    public static GroceryItemModel mapTo(GroceryItems groceryItems) {
+    public static GroceryItemModel mapToModel(GroceryItems groceryItems) {
         return GroceryItemModel.builder()
                 .id(groceryItems.getId())
                 .name(groceryItems.getName())
@@ -23,7 +22,7 @@ public class GroceryItemsToModelMapper {
                 .build();
     }
 
-    public static GroceryItems mapFrom(GroceryItemModel groceryItemModel) {
+    public static GroceryItems mapToEntity(GroceryItemModel groceryItemModel) {
         return GroceryItems.builder()
                 .id(groceryItemModel.getId())
                 .name(groceryItemModel.getName())

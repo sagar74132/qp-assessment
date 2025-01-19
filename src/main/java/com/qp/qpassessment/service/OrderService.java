@@ -1,7 +1,7 @@
 package com.qp.qpassessment.service;
 
-import com.qp.qpassessment.model.OrderRequest;
-import com.qp.qpassessment.model.OrderResponse;
+import com.qp.qpassessment.model.OrderRequestDto;
+import com.qp.qpassessment.model.OrderResponseDto;
 import com.qp.qpassessment.utils.GenericResponse;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +10,9 @@ import java.util.List;
 @Service
 public interface OrderService {
 
-    GenericResponse<OrderResponse> placeOrder(List<OrderRequest> orderRequests);
+    GenericResponse<OrderResponseDto> placeOrder(List<OrderRequestDto> orderRequestDtos);
 
-    GenericResponse<OrderResponse> getUserOrderList();
+    GenericResponse<OrderResponseDto> getUserOrderList();
 
-    GenericResponse<OrderResponse> getOrderById();
+    GenericResponse<OrderResponseDto> getOrderById();
 }

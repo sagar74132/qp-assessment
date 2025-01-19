@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class OrderItemsResponse {
+public class OrderItemsResponseDto {
 
     private UUID groceryItemId;
     private String groceryName;

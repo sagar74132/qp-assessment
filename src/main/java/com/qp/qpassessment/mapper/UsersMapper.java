@@ -1,7 +1,7 @@
 package com.qp.qpassessment.mapper;
 
 import com.qp.qpassessment.entity.Users;
-import com.qp.qpassessment.model.UsersModel;
+import com.qp.qpassessment.model.UsersDto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class UsersMapper {
 
-    public static UsersModel entityToModel(Users users) {
-        return UsersModel.builder()
+    public static UsersDto entityToModel(Users users) {
+        return UsersDto.builder()
                 .id(users.getId())
                 .name(users.getName())
                 .email(users.getEmail())
@@ -21,13 +21,13 @@ public class UsersMapper {
                 .build();
     }
 
-    public static Users modelToEntity(UsersModel usersModel) {
+    public static Users modelToEntity(UsersDto usersDto) {
         return Users.builder()
-                .id(usersModel.getId())
-                .name(usersModel.getName())
-                .email(usersModel.getEmail())
-                .password(usersModel.getPassword())
-                .role(usersModel.getRole())
+                .id(usersDto.getId())
+                .name(usersDto.getName())
+                .email(usersDto.getEmail())
+                .password(usersDto.getPassword())
+                .role(usersDto.getRole())
                 .build();
     }
 

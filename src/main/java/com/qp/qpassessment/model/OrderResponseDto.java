@@ -10,11 +10,11 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class OrderResponse {
+public class OrderResponseDto {
 
     private UUID orderId;
     private UUID paymentId;
-    private List<OrderItemsResponse> orderItems;
+    private List<OrderItemsResponseDto> orderItems;
     private BigDecimal totalPrice;
     private LocalDateTime createdAt;
 }

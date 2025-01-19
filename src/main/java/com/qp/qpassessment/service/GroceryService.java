@@ -21,5 +21,5 @@ public interface GroceryService {
 
     GenericResponse<List<GroceryItemModel>> updateGroceryItems(List<GroceryItemModel> items);
 
-    GenericResponse<String> updateInventory(Map<UUID, Integer> items);
+    GenericResponse<List<GroceryItemModel>> updateInventory(Map<UUID, Integer> items);
 }

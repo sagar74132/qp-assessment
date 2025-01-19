@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class UserRoleUpdate {
+public class UserRoleUpdateRequestDto {
 
     private UUID id;
 

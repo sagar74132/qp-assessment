@@ -64,8 +64,8 @@ public class GroceryController {
     }
 
     @PutMapping("/inventory")
-    public ResponseEntity<GenericResponse<String>> inventoryUpdate(@RequestBody Map<UUID, Integer> items) {
-        GenericResponse<String> response = groceryService.updateInventory(items);
+    public ResponseEntity<GenericResponse<List<GroceryItemModel>>> inventoryUpdate(@RequestBody Map<UUID, Integer> items) {
+        GenericResponse<List<GroceryItemModel>> response = groceryService.updateInventory(items);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }

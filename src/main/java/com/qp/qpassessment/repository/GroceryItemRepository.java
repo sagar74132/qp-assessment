@@ -13,6 +13,8 @@ public interface GroceryItemRepository extends JpaRepository<GroceryItems, UUID>
 
     Optional<List<GroceryItems>> findAllByIsDeleted(Integer isDeleted);
 
+    Optional<GroceryItems> findByIdAndIsDeleted(UUID id, Integer isDeleted);
+
     Optional<GroceryItems> findByNameAndIsDeleted(String name, int isDeleted);
 
     Optional<List<GroceryItems>> findAllByIsDeletedAndQuantityGreaterThan(int idDeleted, int quantity);

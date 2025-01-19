@@ -1,6 +1,5 @@
 package com.qp.qpassessment.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.qp.qpassessment.constant.Enums;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -10,13 +9,10 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class PaymentsModel {
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private UUID id;
+public class PaymentStatusUpdateRequestDto {
 
     @NotNull
-    private UUID orderId;
+    private UUID id;
 
     @NotNull
     private Enums.PaymentStatus status;

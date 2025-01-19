@@ -8,15 +8,13 @@ import com.qp.qpassessment.entity.Orders;
 import com.qp.qpassessment.entity.Payments;
 import com.qp.qpassessment.exception.OrdersException;
 import com.qp.qpassessment.mapper.PaymentsMapper;
-import com.qp.qpassessment.model.OrderItemsResponse;
-import com.qp.qpassessment.model.OrderRequest;
-import com.qp.qpassessment.model.OrderResponse;
-import com.qp.qpassessment.model.PaymentsModel;
+import com.qp.qpassessment.model.OrderItemsResponseDto;
+import com.qp.qpassessment.model.OrderRequestDto;
+import com.qp.qpassessment.model.OrderResponseDto;
+import com.qp.qpassessment.model.PaymentsDto;
 import com.qp.qpassessment.repository.OrderItemsRepository;
 import com.qp.qpassessment.repository.OrdersRepository;
-import com.qp.qpassessment.service.GroceryService;
 import com.qp.qpassessment.service.OrderService;
-import com.qp.qpassessment.service.PaymentsService;
 import com.qp.qpassessment.utils.AppConfig;
 import com.qp.qpassessment.utils.GenericResponse;
 import jakarta.transaction.Transactional;
@@ -27,9 +25,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -55,19 +50,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public GenericResponse<OrderResponse> placeOrder(List<OrderRequest> orderRequests) {
+    public GenericResponse<OrderResponseDto> placeOrder(List<OrderRequestDto> orderRequestDtos) {
 
-        List<GroceryItems> groceryItems = groceryService.getGroceryItemsById(orderRequests.stream()
-                .map(OrderRequest::getGroceryItemId)
+        List<GroceryItems> groceryItems = groceryService.getGroceryItemsById(orderRequestDtos.stream()
+                .map(OrderRequestDto::getGroceryItemId)
                 .toList()
         );
 
-        if (groceryItems.isEmpty() || groceryItems.size() != orderRequests.size()) {
+        if (groceryItems.isEmpty() || groceryItems.size() != orderRequestDtos.size()) {
             throw new OrdersException(appConfig.getProperty("order.invalid.items"));
         }
 
         // Throw error if the requested quantity is greater than the available quantity
-        Map<UUID, Integer> invalidGroceryItem = validateGroceryQuantity(orderRequests, groceryItems);
+        Map<UUID, Integer> invalidGroceryItem = validateGroceryQuantity(orderRequestDtos, groceryItems);
         if (null != invalidGroceryItem) {
             GroceryItems item = groceryItems.stream()
                     .filter(e -> e.getId().equals(invalidGroceryItem.keySet().toArray()[0]))
@@ -93,7 +88,7 @@ public class OrderServiceImpl implements OrderService {
         Payments payment = createDefaultPendingPayment(createdOrder);
 
         // Create orderItems and update inventory
-        List<OrderItems> orderItems = processOrderItems(orderRequests, groceryItems, createdOrder);
+        List<OrderItems> orderItems = processOrderItems(orderRequestDtos, groceryItems, createdOrder);
 
 
         // Calculate total price of the order
@@ -109,8 +104,8 @@ public class OrderServiceImpl implements OrderService {
         // Create OrderItems
         orderItemsRepository.saveAll(orderItems);
 
-        List<OrderItemsResponse> orderItemsResponses = orderItems.stream()
-                .map(e -> OrderItemsResponse.builder()
+        List<OrderItemsResponseDto> orderItemsResponsDtos = orderItems.stream()
+                .map(e -> OrderItemsResponseDto.builder()
                         .groceryItemId(e.getGroceryItemId())
                         .groceryName(getGroceryNameFromGroceryId(groceryItems, e.getGroceryItemId()))
                         .quantity(e.getQuantity())
@@ -118,15 +113,15 @@ public class OrderServiceImpl implements OrderService {
                         .build())
                 .toList();
 
-        OrderResponse response = OrderResponse.builder()
+        OrderResponseDto response = OrderResponseDto.builder()
                 .orderId(createdOrder.getId())
-                .orderItems(orderItemsResponses)
+                .orderItems(orderItemsResponsDtos)
                 .createdAt(createdOrder.getCreatedAt())
                 .totalPrice(createdOrder.getTotalPrice())
                 .paymentId(payment.getId())
                 .build();
 
-        return GenericResponse.<OrderResponse>builder()
+        return GenericResponse.<OrderResponseDto>builder()
                 .data(response)
                 .message(appConfig.getProperty("order.place.success", order.getId()))
                 .status(HttpStatus.CREATED)
@@ -134,26 +129,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public GenericResponse<OrderResponse> getUserOrderList() {
+    public GenericResponse<OrderResponseDto> getUserOrderList() {
         return null;
     }
 
     @Override
-    public GenericResponse<OrderResponse> getOrderById() {
+    public GenericResponse<OrderResponseDto> getOrderById() {
         return null;
     }
 
     /**
      * This method will validate the grocery quantity
      *
-     * @param orderRequests user requested grocery items
+     * @param orderRequestDtos user requested grocery items
      * @param groceryItems  groceryItems from inventory
      * @return Map<UUID, Integer> if found any quantity invalid for a grocery otherwise null.
      */
-    private Map<UUID, Integer> validateGroceryQuantity(List<OrderRequest> orderRequests, List<GroceryItems> groceryItems) {
+    private Map<UUID, Integer> validateGroceryQuantity(List<OrderRequestDto> orderRequestDtos, List<GroceryItems> groceryItems) {
         Map<UUID, Integer> groceryItemQuantityMap = groceryItems.stream()
                 .collect(HashMap::new, (map, item) -> map.put(item.getId(), item.getQuantity()), HashMap::putAll);
-        Map<UUID, Integer> orderItemQuantityMap = orderRequests.stream()
+        Map<UUID, Integer> orderItemQuantityMap = orderRequestDtos.stream()
                 .collect(HashMap::new, (map, item) -> map.put(item.getGroceryItemId(), item.getQuantity()), HashMap::putAll);
 
         for (Map.Entry<UUID, Integer> entry : orderItemQuantityMap.entrySet()) {
@@ -202,32 +197,32 @@ public class OrderServiceImpl implements OrderService {
     /**
      * This method will process the order items and update the inventory
      *
-     * @param orderRequests user requested grocery items
+     * @param orderRequestDtos user requested grocery items
      * @param groceryItems  groceryItems from inventory
      * @param createdOrder  created order
      * @return List<OrderItems> list of order items
      */
-    private List<OrderItems> processOrderItems(List<OrderRequest> orderRequests,
+    private List<OrderItems> processOrderItems(List<OrderRequestDto> orderRequestDtos,
                                                List<GroceryItems> groceryItems,
                                                Orders createdOrder) {
         List<OrderItems> orderItems = new ArrayList<>();
-        for (OrderRequest orderRequest : orderRequests) {
+        for (OrderRequestDto orderRequestDto : orderRequestDtos) {
 
-            BigDecimal price = getPriceFromGroceryItem(groceryItems, orderRequest.getGroceryItemId());
+            BigDecimal price = getPriceFromGroceryItem(groceryItems, orderRequestDto.getGroceryItemId());
 
             GroceryItems item = groceryItems.stream()
-                    .filter(e -> e.getId().equals(orderRequest.getGroceryItemId()))
+                    .filter(e -> e.getId().equals(orderRequestDto.getGroceryItemId()))
                     .findFirst().orElse(GroceryItems.builder().build());
 
             // Update the quantity in inventory
-            item.setQuantity(item.getQuantity() - orderRequest.getQuantity());
+            item.setQuantity(item.getQuantity() - orderRequestDto.getQuantity());
             groceryService.updateInventory(Map.of(item.getId(), item.getQuantity()));
 
             OrderItems orderItem = OrderItems.builder()
                     .orderId(createdOrder.getId())
-                    .groceryItemId(orderRequest.getGroceryItemId())
-                    .quantity(orderRequest.getQuantity())
-                    .price(price.multiply(BigDecimal.valueOf(orderRequest.getQuantity())))
+                    .groceryItemId(orderRequestDto.getGroceryItemId())
+                    .quantity(orderRequestDto.getQuantity())
+                    .price(price.multiply(BigDecimal.valueOf(orderRequestDto.getQuantity())))
                     .build();
 
             orderItems.add(orderItem);
@@ -238,12 +233,12 @@ public class OrderServiceImpl implements OrderService {
 
     private Payments createDefaultPendingPayment(Orders order) {
 
-        PaymentsModel paymentsModel = PaymentsModel.builder()
+        PaymentsDto paymentsDto = PaymentsDto.builder()
                 .orderId(order.getId())
                 .status(Enums.PaymentStatus.PENDING)
                 .build();
 
-        GenericResponse<PaymentsModel> response = paymentsService.createPayment(paymentsModel);
+        GenericResponse<PaymentsDto> response = paymentsService.createPayment(paymentsDto);
 
         return PaymentsMapper.mapToPayments(response.getData());
     }

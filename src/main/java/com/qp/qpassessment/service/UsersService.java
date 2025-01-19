@@ -1,7 +1,7 @@
 package com.qp.qpassessment.service;
 
-import com.qp.qpassessment.model.UserRoleUpdate;
-import com.qp.qpassessment.model.UsersModel;
+import com.qp.qpassessment.model.UserRoleUpdateRequestDto;
+import com.qp.qpassessment.model.UsersDto;
 import com.qp.qpassessment.utils.GenericResponse;
 import org.springframework.stereotype.Service;
 
@@ -10,15 +10,15 @@ import java.util.UUID;
 @Service
 public interface UsersService {
 
-    GenericResponse<UsersModel> createUser(UsersModel user);
+    GenericResponse<UsersDto> createUser(UsersDto user);
 
-    GenericResponse<UsersModel> updateUser(UsersModel user);
+    GenericResponse<UsersDto> updateUser(UsersDto user);
 
-    GenericResponse<UsersModel> updateUserRole(UserRoleUpdate userRoleUpdate);
+    GenericResponse<UsersDto> updateUserRole(UserRoleUpdateRequestDto userRoleUpdateRequestDto);
 
-    GenericResponse<UsersModel> getUserByEmailAndPassword(String email, String password);
+    GenericResponse<UsersDto> getUserByEmailAndPassword(String email, String password);
 
-    GenericResponse<UsersModel> getUserByEmail(String email);
+    GenericResponse<UsersDto> getUserByEmail(String email);
 
-    GenericResponse<UsersModel> deleteUser(UUID id);
+    GenericResponse<UsersDto> deleteUser(UUID id);
 }
