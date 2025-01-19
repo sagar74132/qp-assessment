@@ -23,6 +23,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final String[] AUTH_WHITE_LIST = {
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/webjars/**",
+            "/api/v1/login"
+    };
+
+    private static final String[] ADMIN_PERMITTED = {
+            "/api/v1/users/role",
+            "/api/v1/grocery/remove",
+            "/api/v1/grocery/update",
+            "/api/v1/grocery/inventory",
+            "/api/v1/grocery/add",
+            "/api/v1/grocery/all",
+    };
+
     private final UsersRepository usersRepository;
     private final JwtAuthenticationEntryPoint point;
     private final JwtAuthenticationFilter filter;
@@ -41,9 +58,8 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/api/v1/login").permitAll()
-                        .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers(AUTH_WHITE_LIST).permitAll()
+                        .requestMatchers(ADMIN_PERMITTED).hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
