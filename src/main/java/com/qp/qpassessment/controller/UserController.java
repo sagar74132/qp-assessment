@@ -1,7 +1,9 @@
 package com.qp.qpassessment.controller;
 
 import com.qp.qpassessment.model.UserRoleUpdateRequestDto;
-import com.qp.qpassessment.model.UsersDto;
+import com.qp.qpassessment.model.UsersDetailsUpdateRequest;
+import com.qp.qpassessment.model.UsersRequestDto;
+import com.qp.qpassessment.model.UsersResponseDto;
 import com.qp.qpassessment.service.UsersService;
 import com.qp.qpassessment.service.impl.UsersServiceImpl;
 import com.qp.qpassessment.utils.AppConfig;
@@ -27,29 +29,29 @@ public class UserController {
     }
 
     @PostMapping("")
-    public ResponseEntity<GenericResponse<UsersDto>> createUser(@RequestBody UsersDto usersDto) {
-        GenericResponse<UsersDto> response = usersService.createUser(usersDto);
+    public ResponseEntity<GenericResponse<UsersResponseDto>> createUser(@RequestBody UsersRequestDto usersRequestDto) {
+        GenericResponse<UsersResponseDto> response = usersService.createUser(usersRequestDto);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("")
-    public ResponseEntity<GenericResponse<UsersDto>> updateUser(@RequestBody UsersDto usersDto) {
-        GenericResponse<UsersDto> response = usersService.updateUser(usersDto);
+    public ResponseEntity<GenericResponse<UsersResponseDto>> updateUser(@RequestBody UsersDetailsUpdateRequest usersDetailsUpdateRequest) {
+        GenericResponse<UsersResponseDto> response = usersService.updateUser(usersDetailsUpdateRequest);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @PutMapping("/role")
-    public ResponseEntity<GenericResponse<UsersDto>> updateUserRole(@RequestBody UserRoleUpdateRequestDto payload) {
-        GenericResponse<UsersDto> response = usersService.updateUserRole(payload);
+    public ResponseEntity<GenericResponse<UsersResponseDto>> updateUserRole(@RequestBody UserRoleUpdateRequestDto payload) {
+        GenericResponse<UsersResponseDto> response = usersService.updateUserRole(payload);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<GenericResponse<UsersDto>> deleteUser(@PathVariable UUID id) {
-        GenericResponse<UsersDto> response = usersService.deleteUser(id);
+    public ResponseEntity<GenericResponse<UsersResponseDto>> deleteUser(@PathVariable UUID id) {
+        GenericResponse<UsersResponseDto> response = usersService.deleteUser(id);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }

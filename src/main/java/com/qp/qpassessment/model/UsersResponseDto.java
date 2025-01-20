@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class UsersDto {
+public class UsersResponseDto {
 
     private UUID id;
 
@@ -19,7 +19,6 @@ public class UsersDto {
     @Email
     private String email;
 
-    // To prevent it from being shown in the response
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 

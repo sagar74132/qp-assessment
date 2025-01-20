@@ -12,21 +12,23 @@ import java.util.Optional;
 public final class Util {
 
     public static IdentityContext getIdentity() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Optional<Authentication> auth = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
 
-        if (auth.getPrincipal().equals("anonymousUser")) {
-            return null;
+        String email = null;
+        Enums.Role role = null;
+
+        if (auth.isPresent()) {
+            Optional<?> roleFromContext = auth.get().getAuthorities().stream().findFirst();
+            Optional<String> emailFromContext = Optional.ofNullable(auth.get().getName());
+
+            if (roleFromContext.isPresent() && emailFromContext.isPresent()) {
+                role = Enums.Role.valueOf(roleFromContext.get().toString().substring(5));
+                email = emailFromContext.get();
+            }
         }
-
-        Optional<?> roleFromContext = auth.getAuthorities().stream().findFirst();
-        if (roleFromContext.isEmpty()) {
-            return null;
-        }
-
-        Enums.Role role = Enums.Role.valueOf(roleFromContext.get().toString().substring(5));
 
         return IdentityContext.builder()
-                .email(auth.getName())
+                .email(email)
                 .role(role)
                 .build();
     }

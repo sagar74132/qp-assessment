@@ -5,7 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
-public class BCryptPasswordEncoderUtil {
+public class PasswordEncoderUtils {
 
     public static String encode(String input) {
         try {

@@ -5,12 +5,15 @@ import com.qp.qpassessment.entity.Users;
 import com.qp.qpassessment.exception.UserExceptions;
 import com.qp.qpassessment.mapper.UsersMapper;
 import com.qp.qpassessment.model.UserRoleUpdateRequestDto;
-import com.qp.qpassessment.model.UsersDto;
+import com.qp.qpassessment.model.UsersDetailsUpdateRequest;
+import com.qp.qpassessment.model.UsersRequestDto;
+import com.qp.qpassessment.model.UsersResponseDto;
 import com.qp.qpassessment.repository.UsersRepository;
 import com.qp.qpassessment.service.UsersService;
 import com.qp.qpassessment.utils.AppConfig;
-import com.qp.qpassessment.utils.BCryptPasswordEncoderUtil;
 import com.qp.qpassessment.utils.GenericResponse;
+import com.qp.qpassessment.utils.PasswordEncoderUtils;
+import com.qp.qpassessment.utils.Util;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,26 +35,21 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     @Transactional
-    public GenericResponse<UsersDto> createUser(UsersDto user) {
-
-        if (null != user.getId()) {
-            throw new UserExceptions(appConfig.getProperty("user.id.not.allowed"));
-        }
+    public GenericResponse<UsersResponseDto> createUser(UsersRequestDto user) {
 
         Optional<Users> existingUser = usersRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
             throw new UserExceptions(appConfig.getProperty("user.already.exist"));
-        } else if (null != user.getRole()) {
-            throw new UserExceptions(appConfig.getProperty("user.role.not.allowed"));
         }
 
         String hashedPassword = hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
-        user.setRole(Enums.Role.USER);
+        Users createUser = UsersMapper.modelToEntity(user);
+        createUser.setRole(Enums.Role.USER);
 
-        Users createdUser = createOrUpdateUser(UsersMapper.modelToEntity(user));
+        Users createdUser = createOrUpdateUser(createUser);
 
-        return GenericResponse.<UsersDto>builder()
+        return GenericResponse.<UsersResponseDto>builder()
                 .message(appConfig.getProperty("user.created"))
                 .data(UsersMapper.entityToModel(createdUser))
                 .status(HttpStatus.CREATED)
@@ -59,12 +57,10 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public GenericResponse<UsersDto> updateUser(UsersDto user) {
-        Optional<Users> existingUser = usersRepository.findById(user.getId());
+    public GenericResponse<UsersResponseDto> updateUser(UsersDetailsUpdateRequest user) {
+        Optional<Users> existingUser = usersRepository.findByEmail(Util.getIdentity().getEmail());
         if (existingUser.isEmpty()) {
             throw new UserExceptions(appConfig.getProperty("user.not.found"));
-        } else if (null != user.getRole()) {
-            throw new UserExceptions(appConfig.getProperty("user.role.modification.not.allowed"));
         }
 
         if (null != user.getPassword()) {
@@ -77,17 +73,18 @@ public class UsersServiceImpl implements UsersService {
             existingUser.get().setName(user.getName());
         }
 
-        if (null != user.getEmail() && !user.getEmail().equals(existingUser.get().getEmail())) {
+        if (null != user.getNewEmail()
+                && !user.getNewEmail().equals(existingUser.get().getEmail())) {
 
-            if (!uniqueEmailCheck(user.getEmail())) {
+            if (!uniqueEmailCheck(user.getNewEmail())) {
                 throw new UserExceptions(appConfig.getProperty("user.update.email.already.exist"));
             }
-            existingUser.get().setEmail(user.getEmail());
+            existingUser.get().setEmail(user.getNewEmail());
         }
 
         Users createdUser = createOrUpdateUser(existingUser.get());
 
-        return GenericResponse.<UsersDto>builder()
+        return GenericResponse.<UsersResponseDto>builder()
                 .message(appConfig.getProperty("user.details.modified"))
                 .data(UsersMapper.entityToModel(createdUser))
                 .status(HttpStatus.OK)
@@ -95,7 +92,7 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public GenericResponse<UsersDto> updateUserRole(UserRoleUpdateRequestDto userRoleUpdateRequestDto) {
+    public GenericResponse<UsersResponseDto> updateUserRole(UserRoleUpdateRequestDto userRoleUpdateRequestDto) {
         Optional<Users> existingUser = usersRepository.findById(userRoleUpdateRequestDto.getId());
         if (existingUser.isEmpty()) {
             throw new UserExceptions(appConfig.getProperty("user.not.found"));
@@ -104,7 +101,7 @@ public class UsersServiceImpl implements UsersService {
         existingUser.get().setRole(userRoleUpdateRequestDto.getRole());
         Users createdUser = createOrUpdateUser(existingUser.get());
 
-        return GenericResponse.<UsersDto>builder()
+        return GenericResponse.<UsersResponseDto>builder()
                 .message(appConfig.getProperty("user.role.updated"))
                 .data(UsersMapper.entityToModel(createdUser))
                 .status(HttpStatus.OK)
@@ -112,7 +109,7 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public GenericResponse<UsersDto> getUserByEmailAndPassword(String email, String password) {
+    public GenericResponse<UsersResponseDto> getUserByEmailAndPassword(String email, String password) {
 
         String hashedPassword = hashPassword(password);
         Optional<Users> user = usersRepository.findByEmailAndPassword(email, hashedPassword);
@@ -121,14 +118,14 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public GenericResponse<UsersDto> getUserByEmail(String email) {
+    public GenericResponse<UsersResponseDto> getUserByEmail(String email) {
         Optional<Users> user = usersRepository.findByEmail(email);
 
         return buildGenericResponse(user);
     }
 
     @Override
-    public GenericResponse<UsersDto> deleteUser(UUID id) {
+    public GenericResponse<UsersResponseDto> deleteUser(UUID id) {
         Optional<Users> user = usersRepository.findById(id);
 
         if (user.isPresent()) {
@@ -138,7 +135,7 @@ public class UsersServiceImpl implements UsersService {
             throw new UserExceptions(appConfig.getProperty("user.not.found"));
         }
 
-        return GenericResponse.<UsersDto>builder()
+        return GenericResponse.<UsersResponseDto>builder()
                 .message(appConfig.getProperty("user.deleted"))
                 .data(UsersMapper.entityToModel(user.get()))
                 .status(HttpStatus.OK)
@@ -150,18 +147,18 @@ public class UsersServiceImpl implements UsersService {
     }
 
     private String hashPassword(String password) {
-        return BCryptPasswordEncoderUtil.encode(password);
+        return PasswordEncoderUtils.encode(password);
     }
 
-    private GenericResponse<UsersDto> buildGenericResponse(Optional<Users> user) {
+    private GenericResponse<UsersResponseDto> buildGenericResponse(Optional<Users> user) {
         if (user.isPresent()) {
-            return GenericResponse.<UsersDto>builder()
+            return GenericResponse.<UsersResponseDto>builder()
                     .message(appConfig.getProperty("user.found"))
                     .data(UsersMapper.entityToModel(user.get()))
                     .status(HttpStatus.FOUND)
                     .build();
         } else {
-            return GenericResponse.<UsersDto>builder()
+            return GenericResponse.<UsersResponseDto>builder()
                     .message(appConfig.getProperty("user.not.found"))
                     .status(HttpStatus.NOT_FOUND)
                     .build();
@@ -169,7 +166,12 @@ public class UsersServiceImpl implements UsersService {
     }
 
     private boolean uniqueEmailCheck(String email) {
-        GenericResponse<UsersDto> existingUser = getUserByEmail(email);
+        GenericResponse<UsersResponseDto> existingUser = getUserByEmail(email);
         return null == existingUser.getData();
+    }
+
+    public Optional<UUID> getIdFromEmail(String email) {
+        GenericResponse<UsersResponseDto> existingUser = getUserByEmail(email);
+        return Optional.ofNullable(existingUser.getData().getId());
     }
 }

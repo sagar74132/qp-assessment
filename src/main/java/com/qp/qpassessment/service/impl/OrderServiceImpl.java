@@ -17,6 +17,7 @@ import com.qp.qpassessment.repository.OrdersRepository;
 import com.qp.qpassessment.service.OrderService;
 import com.qp.qpassessment.utils.AppConfig;
 import com.qp.qpassessment.utils.GenericResponse;
+import com.qp.qpassessment.utils.Util;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrdersRepository ordersRepository;
     private final OrderItemsRepository orderItemsRepository;
     private final PaymentsServiceImpl paymentsService;
+    private final UsersServiceImpl usersService;
     private final GroceryServiceImpl groceryService;
     private final AppConfig appConfig;
 
@@ -39,11 +41,13 @@ public class OrderServiceImpl implements OrderService {
     public OrderServiceImpl(final OrdersRepository ordersRepository,
                             final OrderItemsRepository orderItemsRepository,
                             final PaymentsServiceImpl paymentsService,
+                            final UsersServiceImpl usersService,
                             final GroceryServiceImpl groceryService,
                             final AppConfig appConfig) {
         this.ordersRepository = ordersRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.paymentsService = paymentsService;
+        this.usersService = usersService;
         this.groceryService = groceryService;
         this.appConfig = appConfig;
     }
@@ -74,8 +78,14 @@ public class OrderServiceImpl implements OrderService {
             ));
         }
 
+        // Get LoggedIn user Id
+        Optional<UUID> id = usersService.getIdFromEmail(Util.getIdentity().getEmail());
+        if (id.isEmpty()) {
+            throw new OrdersException(appConfig.getProperty("order.user.not.found"));
+        }
+
         Orders order = Orders.builder()
-                .userId(UUID.fromString("80cb39fe-374e-4d23-b6ca-87d294d32514")) // TODO: Change it once Spring security is in place
+                .userId(id.get())
                 .totalPrice(BigDecimal.ZERO)
                 .status(Enums.OrderItemStatus.PENDING)
                 .build();
