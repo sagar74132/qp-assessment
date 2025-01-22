@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -53,6 +54,16 @@ public class GlobalException {
     public ResponseEntity<GenericResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         GenericResponse<String> response = GenericResponse.<String>builder()
                 .message(appConfig.getProperty("invalid.input.request"))
+                .status(HttpStatus.BAD_REQUEST)
+                .build();
+
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<GenericResponse<String>> handleBadCredentialsException(BadCredentialsException e) {
+        GenericResponse<String> response = GenericResponse.<String>builder()
+                .message(appConfig.getProperty("invalid.credentials"))
                 .status(HttpStatus.BAD_REQUEST)
                 .build();
 
