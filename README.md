@@ -120,7 +120,7 @@
       }
       ```
 
-* Let's place order and try to book multiple items in single order.
+* Let's place order and try to book multiple items in single order. Goto `Order Controller` > `Create Order`
 
 ### Payload
 
@@ -168,7 +168,7 @@
 }
 ```
 
-* Order is now successfully placed. Now let's fetch available items.
+* Order is now successfully placed. Now let's fetch available items. Goto `Grocery Controller` > `Available`
 
 ### Response
 
@@ -283,7 +283,7 @@
 
 ### Response
 
-```json
+```
 Access Denied: Full authentication is required to access this resource
 ```
 
@@ -300,7 +300,7 @@ Access Denied: Full authentication is required to access this resource
 
 ### Response
 
-```json
+```
 Access Denied: Full authentication is required to access this resource
 ```
 
@@ -345,7 +345,7 @@ Access Denied: Full authentication is required to access this resource
 }
 ```
 
-* Update the stock of Mangoes and Apple
+* Update the stock of Mangoes and Apple. Goto `Grocery Controller` > `Update Inventory`
 
 ### Payload
 
@@ -427,7 +427,7 @@ Access Denied: Full authentication is required to access this resource
 }
 ```
 
-* Let's delete a grocer item apple from inventory
+* Let's delete a grocer item apple from inventory. Goto `Grocery Controller` > `Delete Item`
 
 ### Payload
 
@@ -482,7 +482,8 @@ Access Denied: Full authentication is required to access this resource
 }
 ```
 
-* Update the grocery Mangoes and rename it to Apple also update the price also
+* Update the grocery Mangoes and rename it to Apple also update the price also.
+  Goto `Grocery Controller` > `Update Item`
 
 ### Payload
 

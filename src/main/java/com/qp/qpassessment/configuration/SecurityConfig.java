@@ -29,16 +29,13 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/webjars/**",
-            "/api/v1/login"
+            "/api/v1/login",
+            "/api/v1/grocery/available"
     };
 
     private static final String[] ADMIN_PERMITTED = {
             "/api/v1/users/role",
-            "/api/v1/grocery/remove",
-            "/api/v1/grocery/update",
-            "/api/v1/grocery/inventory",
-            "/api/v1/grocery/add",
-            "/api/v1/grocery/all",
+            "/api/v1/grocery/**"
     };
 
     private final UsersRepository usersRepository;
