@@ -1,14 +1,14 @@
 services:
-  #  app:
-  #    build: .
-  #    ports:
-  #      - "8080:8080"
-  #    environment:
-  #      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/qp_grocery_app
-  #      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-  #      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-  #    depends_on:
-  #      - postgres
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/qp_grocery_app
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    depends_on:
+      - postgres
   postgres:
     image: 'postgres:latest'
     environment:

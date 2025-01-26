@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(AUTH_WHITE_LIST).permitAll()
                         .requestMatchers(ADMIN_PERMITTED).hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/user").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -56,3 +56,22 @@ CREATE TABLE payments
     payment_date TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders (id)
 );
+
+
+-- Insert admin user
+INSERT INTO users (id, name, email, password, role)
+VALUES ('462254ea-fbea-43eb-b514-47a54f8478bf',
+        'Admin User',
+        'admin@qp.com',
+        '$2a$10$i.0cLB3alffG9TfU0vezi.kHr7VJ8iwQXYLK6ChvnZNI3F1aOLah2',
+        'ADMIN');
+
+-- Insert regular user
+INSERT INTO users (id, name, email, password, role)
+VALUES ('123e4567-e89b-12d3-a456-426614174001',
+        'Customer',
+        'user@qp.com',
+        '$2a$10$i.0cLB3alffG9TfU0vezi.kHr7VJ8iwQXYLK6ChvnZNI3F1aOLah2',
+        'USER');
+
+

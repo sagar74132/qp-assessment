@@ -49,14 +49,14 @@ public class GroceryController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PostMapping("/add")
+    @PostMapping("")
     public ResponseEntity<GenericResponse<List<GroceryItemModel>>> addGroceryItems(@RequestBody List<GroceryItemModel> items) {
         GenericResponse<List<GroceryItemModel>> response = groceryService.addGroceryItems(items);
 
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @PutMapping("/update")
+    @PutMapping("")
     public ResponseEntity<GenericResponse<List<GroceryItemModel>>> updateGroceryItems(@RequestBody List<GroceryItemModel> items) {
         GenericResponse<List<GroceryItemModel>> response = groceryService.updateGroceryItems(items);
 
@@ -70,7 +70,7 @@ public class GroceryController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
-    @DeleteMapping("/remove")
+    @DeleteMapping("")
     public ResponseEntity<GenericResponse<String>> removeGroceryItems(@RequestBody List<UUID> items) {
         GenericResponse<String> response = groceryService.removeGroceryItems(items);
 
