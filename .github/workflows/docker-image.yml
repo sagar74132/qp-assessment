@@ -24,7 +24,3 @@ jobs:
       
     - name: Check application logs
       run: docker compose logs app
-      
-    - name: Stop containers
-      if: always()
-      run: docker compose down
